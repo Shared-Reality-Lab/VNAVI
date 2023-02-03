@@ -59,8 +59,8 @@ const instructions = "Welcome to the Vision-guided Navigation Assistance for the
 
 class App extends Component {
   // Change this url to the server's IP:PORT, 10.0.2.2 is for AVD localhost testing purpose.
-  url = 'http://132.206.74.92:8002/';
-  // url = 'http://10.0.2.2:5000/';
+  //url = 'http://132.206.74.92:8002/';
+   url = 'http://10.0.2.2:5000/';
   my_path = '';
   resized_img_path = '';
   // Image resize

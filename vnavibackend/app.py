@@ -31,12 +31,12 @@ def detect():
     file = extract_image(request)
     image = Image.open(io.BytesIO(file.read()))
     result = model(image, size=1280)
-    h = result.imgs[0].shape[0]
+    h = result.render()[0].shape[0]
     y0 = int(0.1 * h)
     _, result_df = parse_result(result)
     result_message = str(result_df)
     result.render()
-    for img in result.imgs:
+    for img in result.render():
         rgb_image = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         for i, line in enumerate(result_message.split('\n')):
             y = int(y0 + 0.03 * h * i)
@@ -48,8 +48,9 @@ def detect():
 
 
 def parse_result(result):
-    h = result.imgs[0].shape[0]
-    w = result.imgs[0].shape[1]
+    print(result.render()[0])
+    h = result.render()[0].shape[0]
+    w = result.render()[0].shape[1]
     df = result.pandas().xyxy[0]
     df = df.drop(df[df.name != 'door'].index)
     data_list = []
