@@ -18,6 +18,7 @@ const RNFetchBlob = NativeModules.RNFetchBlob;
 import Tts from 'react-native-tts';
 import ReactNativeHapticFeedback from "react-native-haptic-feedback";
 import Sound from 'react-native-sound';
+import SensorDisplay from './components/sensorDisplay';
 
 const options = {
   enableVibrateFallback: true,
@@ -683,7 +684,7 @@ class App extends Component {
             </Text>
           </TouchableOpacity>
         </RNCamera>
-
+        <SensorDisplay />
         <Text style={styles.text}>{(this.state.running ? this.state.phase + " phase" : "Not Running") + ":" + this.state.mode + " mode"}</Text>
         <TouchableOpacity
           activeOpacity={0.5}
