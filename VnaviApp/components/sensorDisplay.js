@@ -10,6 +10,7 @@ import {
 import { map, filter } from "rxjs/operators";
 
 setUpdateIntervalForType(SensorTypes.gyroscope, 100);
+setUpdateIntervalForType(SensorTypes.accelerometer, 100);
 
 const SensorDisplay = () => {
   const [accelerometerData, setAccelerometerData] = useState({ x: 0, y: 0, z: 0, timestamp: 0 });
