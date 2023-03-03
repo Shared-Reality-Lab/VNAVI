@@ -35,6 +35,8 @@ const iosParams = {
 
 const MAX_UNKNOWN_READINGS = 5; // change depending on number of readings per time unit
 
+const SAVED_STATE_DATA = [];
+
 const sounds = [
   'beep_1_center.mp3',
   'beep_2_center.mp3',
@@ -118,7 +120,8 @@ class App extends Component {
     this.setupSounds();
   };
 
-  resetState = () => {
+  resetState = (last_two_data) => {
+
     this.setState({
       takingPic: false,
       isVisible: false,
@@ -253,6 +256,7 @@ class App extends Component {
 
   takeStream = async () => {
     // Modified above to take multiple images and pass them to AudioFeedback
+    const last_two_data = [];
     if (this.state.running) {
       return;
     }
@@ -300,7 +304,18 @@ class App extends Component {
             .then(res => res.json())
             .then(res => {
               console.log('response' + JSON.stringify(res));
-              this.outputResult(res);
+              if(last_two_data[0] == null){
+                res.data[0] == undefined ? last_two_data[0] = 'no door' : last_two_data[0] = res.data[0][0];
+              }
+              else if(last_two_data[1] == null){
+                res.data[0] == undefined ? last_two_data[1] = 'no door' : last_two_data[1] = res.data[0][0];
+              }
+              else{
+                last_two_data[0] = last_two_data[1];
+                res.data[0] == undefined ? last_two_data[1] = 'no door' : last_two_data[1] = res.data[0][0];
+              }
+              console.log('Last 2 data: ' + last_two_data);
+              this.outputResult(res, last_two_data);
             })
             .catch(e => console.log(e))
             .done();
@@ -316,6 +331,7 @@ class App extends Component {
 
 
   outputPositionText = (position) => {
+    console.log(position);
     switch (position) {
       case 10:
       case 11:
@@ -617,7 +633,7 @@ class App extends Component {
     }
   }
 
-  outputResult = (res) => {
+  outputResult = (res, last_two_data) => {
     //{"columns":["orie(clk)","dist(m)","conf"],"index":[0],"data":[[12,0,0.425]]}
     let distances = [];
     let angles = [];
@@ -631,12 +647,14 @@ class App extends Component {
       angles.push(angle);
     }
 
-    if (distances.length == 0) {
-      console.log("No results");
+    if (distances.length == 0) {  //As long as we have no results we won't be entering the search phase 
+      console.log("No results"); 
       if (this.state.unknownReadings >= MAX_UNKNOWN_READINGS) {
-        this.resetState();
+        this.resetState(last_two_data);
       } else {
         this.setState({ unknownReadings: this.state.unknownReadings + 1 });
+        if (last_two_data[0] !== 'no data' && last_two_data[1] === 'no data' && this.state.unknownReadings === 1) SAVED_STATE_DATA = last_two_data; 
+        console.log('SAVED DATA: ' + SAVED_STATE_DATA);
       }
       return;
     } else {
