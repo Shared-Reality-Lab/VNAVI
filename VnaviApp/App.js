@@ -661,6 +661,7 @@ class App extends Component {
     return (
       <View style={styles.container}>
         <RNCamera
+          captureAudio={false}
           style={{ flex: 5, alignItems: 'center' }}
           ref={ref => {
             this.camera = ref;
