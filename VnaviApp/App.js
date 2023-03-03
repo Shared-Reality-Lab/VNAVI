@@ -12,7 +12,9 @@ import {
 } from 'react-native';
 import ImageEditor from '@react-native-community/image-editor';
 import { RNCamera } from 'react-native-camera';
-import RNFetchBlob from 'rn-fetch-blob';
+//import RNFetchBlob from 'rn-fetch-blob';
+import {NativeModules} from 'react-native';
+const RNFetchBlob = NativeModules.RNFetchBlob;
 import Tts from 'react-native-tts';
 import ReactNativeHapticFeedback from "react-native-haptic-feedback";
 import Sound from 'react-native-sound';
