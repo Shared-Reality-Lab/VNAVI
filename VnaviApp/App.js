@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, useState } from 'react';
 import {
   StyleSheet,
   View,
@@ -68,6 +68,8 @@ class App extends Component {
   h = 1280;
   w = 640;
 
+  
+
   state = {
     saved_state_data: [],
     takingPic: false,
@@ -85,6 +87,7 @@ class App extends Component {
     numberOfSame: 0,
     sounds: {},
     unknownReadings: 0,
+    last_two_data: [],
   };
 
   setupSounds() {
@@ -304,14 +307,29 @@ class App extends Component {
             .then(res => {
               console.log('response' + JSON.stringify(res));
               if(last_two_data[0] == null){
-                res.data[0] == undefined ? last_two_data[0] = 'no door' : last_two_data[0] = res.data[0][0];
+                if(res.data[0] == undefined){
+                  last_two_data[0] = 'no door';
+                } else {
+                  last_two_data[0] = res.data[0][0];
+                  last_two_data[2] = res.data[0][0];
+                }
               }
               else if(last_two_data[1] == null){
-                res.data[0] == undefined ? last_two_data[1] = 'no door' : last_two_data[1] = res.data[0][0];
+                if(res.data[0] == undefined){
+                  last_two_data[1] = 'no door';
+                } else {
+                  last_two_data[1] = res.data[0][0];
+                  last_two_data[2] = res.data[0][0];
+                }
               }
               else{
                 last_two_data[0] = last_two_data[1];
-                res.data[0] == undefined ? last_two_data[1] = 'no door' : last_two_data[1] = res.data[0][0];
+                if(res.data[0] == undefined){
+                  last_two_data[1] = 'no door';
+                } else {
+                  last_two_data[1] = res.data[0][0];
+                  last_two_data[2] = res.data[0][0];
+                }
               }
               console.log('Last 2 data: ' + last_two_data);
               this.outputResult(res, last_two_data);
@@ -324,6 +342,7 @@ class App extends Component {
           this.setState({ takingPic: false });
         }
       }
+      this.setState({last_two_data: last_two_data});
       await this.delay(1000);
     }
   };
@@ -657,7 +676,7 @@ class App extends Component {
           this.setState({saved_state_data: this.state.saved_state_data});
           console.log('entered');
         } 
-        console.log('SAVED DATA: ' + this.state.saved_state_data);
+        // console.log('SAVED DATA: ' + this.state.saved_state_data);
       }
       return;
     } else {
@@ -703,7 +722,7 @@ class App extends Component {
             </Text>
           </TouchableOpacity>
         </RNCamera>
-        {/* <SensorDisplay /> */}
+        <SensorDisplay data={this.state.last_two_data}/>
         <Text style={styles.text}>{(this.state.running ? this.state.phase + " phase" : "Not Running") + ":" + this.state.mode + " mode"}</Text>
         <TouchableOpacity
           activeOpacity={0.5}
