@@ -9,7 +9,7 @@ import pandas as pd
 
 app = Flask(__name__)
 
-model = torch.hub.load("ultralytics/yolov5", "custom", path="yolov5_models/door_detect/best.pt", force_reload=True)
+model = torch.hub.load("ultralytics/yolov5", "custom", path="vnavibackend/yolov5_models/door_detect/best.pt", force_reload=True)
 
 
 def extract_image(request_in):
