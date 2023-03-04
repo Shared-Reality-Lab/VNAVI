@@ -35,8 +35,6 @@ const iosParams = {
 
 const MAX_UNKNOWN_READINGS = 5; // change depending on number of readings per time unit
 
-const SAVED_STATE_DATA = [];
-
 const sounds = [
   'beep_1_center.mp3',
   'beep_2_center.mp3',
@@ -63,7 +61,7 @@ const instructions = "Welcome to the Vision-guided Navigation Assistance for the
 class App extends Component {
   // Change this url to the server's IP:PORT, 10.0.2.2 is for AVD localhost testing purpose.
   //url = 'http://132.206.74.92:8002/';
-   url = 'http://10.0.2.2:5000/';
+  url = 'http://10.0.2.2:5000/';
   my_path = '';
   resized_img_path = '';
   // Image resize
@@ -71,6 +69,7 @@ class App extends Component {
   w = 640;
 
   state = {
+    saved_state_data: [],
     takingPic: false,
     isVisible: false,
     running: false,
@@ -120,7 +119,7 @@ class App extends Component {
     this.setupSounds();
   };
 
-  resetState = (last_two_data) => {
+  resetState = () => {
 
     this.setState({
       takingPic: false,
@@ -653,8 +652,12 @@ class App extends Component {
         this.resetState(last_two_data);
       } else {
         this.setState({ unknownReadings: this.state.unknownReadings + 1 });
-        if (last_two_data[0] !== 'no data' && last_two_data[1] === 'no data' && this.state.unknownReadings === 1) SAVED_STATE_DATA = last_two_data; 
-        console.log('SAVED DATA: ' + SAVED_STATE_DATA);
+        if ((last_two_data[0] !== 'no door') && (last_two_data[1] === 'no door') && (this.state.unknownReadings === 1)) {
+          this.state.saved_state_data = last_two_data;
+          this.setState({saved_state_data: this.state.saved_state_data});
+          console.log('entered');
+        } 
+        console.log('SAVED DATA: ' + this.state.saved_state_data);
       }
       return;
     } else {
@@ -700,7 +703,7 @@ class App extends Component {
             </Text>
           </TouchableOpacity>
         </RNCamera>
-        <SensorDisplay />
+        {/* <SensorDisplay /> */}
         <Text style={styles.text}>{(this.state.running ? this.state.phase + " phase" : "Not Running") + ":" + this.state.mode + " mode"}</Text>
         <TouchableOpacity
           activeOpacity={0.5}
