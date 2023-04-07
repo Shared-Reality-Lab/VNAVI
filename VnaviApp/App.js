@@ -17,6 +17,13 @@ import Tts from 'react-native-tts';
 import ReactNativeHapticFeedback from "react-native-haptic-feedback";
 import Sound from 'react-native-sound';
 import SensorDisplay from './components/sensorDisplay';
+import { LogBox } from 'react-native';
+
+LogBox.ignoreAllLogs();
+
+var count = 3;
+var door_found = false;
+var searching_phase = true;
 
 const options = {
   enableVibrateFallback: true,
@@ -30,7 +37,7 @@ const androidParams = {
 }
 
 const iosParams = {
-  iosVoiceId: 'com.apple.ttsbundle.Moira-compact'
+  iosVoiceId: 'com.apple.ttsbundle.Moira'
 }
 
 const MAX_UNKNOWN_READINGS = 5; // change depending on number of readings per time unit
@@ -61,7 +68,7 @@ const instructions = "Welcome to the Vision-guided Navigation Assistance for the
 class App extends Component {
   // Change this url to the server's IP:PORT, 10.0.2.2 is for AVD localhost testing purpose.
   //url = 'http://132.206.74.92:8002/';
-  url = 'http://10.0.2.2:5000/';
+  url = 'http://10.122.88.125:5000/';
   my_path = '';
   resized_img_path = '';
   // Image resize
@@ -112,14 +119,10 @@ class App extends Component {
   }
 
   componentDidMount = () => {
-    Tts.voices().then(voices => {
-      // voices.forEach((voice) => console.log(voice.id));
-      Tts.setDefaultVoice("en-au-x-auc-local")
-    });
-    Tts.setDefaultRate(0.6);
-    Tts.addEventListener('tts-finish', (event) => this.setState({ speaking: false })); // prevent from speaking before finishing
+    Tts.setDefaultLanguage('en-US');
 
-    this.setupSounds();
+
+
   };
 
   resetState = () => {
@@ -492,6 +495,7 @@ class App extends Component {
 
   searchPhase = (distances, angles) => {
     console.log("Door Detected");
+    count++;
     distances[0] = Math.round(distances[0] * 10) / 10;
     console.log(distances[0] + " meters away");
     this.state.doorReadings.dists.push(distances[0]);
@@ -505,7 +509,14 @@ class App extends Component {
     }
     if (this.state.doorReadings.dists.length <= 1) {
       if (this.state.mode == "Voice") {
-        this.speak("A door was detected, " + distances[0] + " meters away, " + this.outputPositionText(angles[0])); // maybe filter out very high distances (e.g > 10 meters)
+        if(count>3 || !door_found){
+          count = 0;
+          door_found = true;
+          searching_phase = false;
+          Tts.stop()
+          Tts.speak("A door was detected, " + distances[0] + " meters away, " + this.outputPositionText(angles[0]));
+        }
+         // maybe filter out very high distances (e.g > 10 meters)
       } else {
         this.beepBasedOnDistanceAndAngle(distances[0], angles[0]);
       }
@@ -514,21 +525,40 @@ class App extends Component {
       if (this.relativeDiff(distances[0], dist_prev) < 0.5 && Math.abs(angles[0] - ang_prev) <= 2) {
         if (distances[0] > 2) { // we are more than 2 meters away
           if (this.state.mode == "Voice") {
-            this.speak("A door was detected, " + distances[0] + " meters away, " + this.outputPositionText(angles[0])); // maybe filter out very high distances (e.g > 10 meters)
+            if(count>3 || !door_found){
+              count = 0;
+              door_found = true;
+              searching_phase = false;
+              Tts.stop()
+              Tts.speak("A door was detected, " + distances[0] + " meters away, " + this.outputPositionText(angles[0]));
+            }
+             // maybe filter out very high distances (e.g > 10 meters)
           } else {
             this.beepBasedOnDistanceAndAngle(distances[0], angles[0]);
           }
           this.setState({ phase: "Calibrating" });
         } else if (distances[0] > 0.5 && distances[0] < 2) { // we are between 0.5 and 2 meters away
           if (this.state.mode == "Voice") {
-            this.speak("A door was detected, " + distances[0] + " meters away, " + this.outputPositionText(angles[0])); // maybe filter out very high distances (e.g > 10 meters)
+            if(count>3 || !door_found){
+              count = 0;
+              door_found = true;
+              searching_phase = false;
+              Tts.stop()
+              Tts.speak("A door was detected, " + distances[0] + " meters away, " + this.outputPositionText(angles[0]));
+            }
           } else {
             this.beepBasedOnDistanceAndAngle(distances[0], angles[0]);
           }
           this.setState({ phase: "Approaching" });
         } else if (distances[0] > 0) { // we are less than 0.5 meters away
           if (this.state.mode == "Voice") {
-            this.speak("A door was detected, " + distances[0] + " meters away, " + this.outputPositionText(angles[0])); // maybe filter out very high distances (e.g > 10 meters)
+            if(count>3 || !door_found){
+              count = 0;
+              door_found = true;
+              searching_phase = false;
+              Tts.stop()
+              Tts.speak("A door was detected, " + distances[0] + " meters away, " + this.outputPositionText(angles[0]));
+            }
           } else {
             this.beepBasedOnDistanceAndAngle(distances[0], angles[0]);
           }
@@ -536,7 +566,7 @@ class App extends Component {
         } else { // we are 0 meters away
           // maybe wait for a second reading to confirm
           console.log("door reached already");
-          this.speak("Door reached already");
+          Tts.speak("Door reached already");
           this.resetState();
         }
       } else {
@@ -667,6 +697,13 @@ class App extends Component {
 
     if (distances.length == 0) {  //As long as we have no results we won't be entering the search phase 
       console.log("No results"); 
+      door_found = false;
+      count++;
+      if(count>3 && searching_phase){
+        count = 0;
+        Tts.stop()
+        Tts.speak("No door found, keep looking around") 
+      }
       if (this.state.unknownReadings >= MAX_UNKNOWN_READINGS) {
         this.resetState(last_two_data);
       } else {
