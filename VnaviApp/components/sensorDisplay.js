@@ -11,6 +11,7 @@ import {
   magnetometer
 } from "react-native-sensors";
 import { map, filter } from "rxjs/operators";
+
 const GYROSCOPE_RATE = 50;
 const MAX_HISTORY = 1000;
 //Gyroscope is not polling at the supposed 20Hz, need to fix!
@@ -24,7 +25,6 @@ const SensorDisplay = (props) => {
   const [gyroscopeData, setGyroscopeData] = useState({ x: 0, y: 0, z: 0, timestamp: 0 });
   const [angleHistory, setAngleHistory] = useState(0);
   const [gyroscopeHistory, setGyroscopeHistory] = useState(0);
-
   // const gyroscopeSubscription = gyroscope.subscribe(({ x, y, z, timestamp }) => {
   //   setGyroscopeData({ x, y, z, timestamp });
   //   console.log(y)
@@ -34,8 +34,12 @@ const SensorDisplay = (props) => {
     
     // console.log(count);
     const accelerometerSubscription = accelerometer.subscribe(({ x, y, z, timestamp }) => {
-      setAccelerometerData({ x, y, z, timestamp });
+      if (accelerometerData.timestamp == 0) {
+        setAccelerometerData({ x, y, z, timestamp });
+        return;
+      }
 
+      setAccelerometerData({ x, y, z, timestamp });
     });
     const gyroscopeSubscription = gyroscope.subscribe(({ x, y, z, timestamp }) => {
       setGyroscopeData({ x, y, z, timestamp });
@@ -49,28 +53,36 @@ const SensorDisplay = (props) => {
             totalAngle += y*(GYROSCOPE_RATE/1000);
             var degrees = 3 * totalAngle * (180/Math.PI);
             setAngleHistory(angleHistory + degrees);
+            //console.log("Angle History: " + angleHistory + degrees);
             var clockSegments = Math.floor(angleHistory/30);
             if((currentSegment+clockSegments)%12 > 0){
               currentSegment = (currentSegment+clockSegments)%12;
             } else {
               currentSegment = (currentSegment+clockSegments)%12 + 12;
             }
-            console.log("Estimation: " + currentSegment);
+            //console.log("Estimation: " + currentSegment);
             count++;
             if(count >= 60){
               if(count >= 100){
-                Tts.stop();
-                Tts.speak("Door lost, calculating position");
+                if(props.distanceHistory.length < 1){
+                  Tts.stop();
+                  Tts.speak("Door lost, calculating position");
+                  Tts.speak("Door last seen at " + currentSegment.toString() + "o'clock");
+                }
+                // Tts.stop();
+                // Tts.speak("Door lost, calculating position");
                 // Tts.speak("Door last seen at " + currentSegment.toString() + "o'clock");
               } else {
-                Tts.speak("Door last seen at " + currentSegment.toString() + "o'clock");
+                if(props.distanceHistory.length < 1){
+                  Tts.speak("Door last seen at " + currentSegment.toString() + "o'clock");
+                }
               }
               count = 0;
             }
           } else {
             setAngleHistory(0);
             setGyroscopeHistory(gyroscopeHistory+y);
-            console.log(gyroscopeHistory);
+            //console.log(gyroscopeHistory);
             count = 100;
           }
         }
@@ -82,7 +94,7 @@ const SensorDisplay = (props) => {
       accelerometerSubscription.unsubscribe();
       gyroscopeSubscription.unsubscribe();
     };
-  }, [gyroscopeData]);
+  }, [gyroscopeData, accelerometerData]);
 
   return (
     <View style={{ position:'absolute', backgroundColor: 'rgba(255,255,255,0.2)' }}>

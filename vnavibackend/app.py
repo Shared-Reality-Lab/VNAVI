@@ -6,7 +6,6 @@ import cv2
 import io
 import json
 import pandas as pd
-
 app = Flask(__name__)
 
 model = torch.hub.load("ultralytics/yolov5", "custom", path="yolov5_models/door_detect/best.pt", force_reload=True)
@@ -48,7 +47,6 @@ def detect():
 
 
 def parse_result(result):
-    print(result.render()[0])
     h = result.render()[0].shape[0]
     w = result.render()[0].shape[1]
     df = result.pandas().xyxy[0]
@@ -99,4 +97,4 @@ def detect_res_json():
 
 
 if __name__ == '__main__':
-    app.run(debug=False, host='10.122.88.125')
+    app.run(debug=False, host='0.0.0.0', port=5001)
