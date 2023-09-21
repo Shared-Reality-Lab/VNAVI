@@ -72,7 +72,7 @@ var reachForHandle = false;
 class App extends Component {
   // Change this url to the server's IP:PORT, 10.0.2.2 is for AVD localhost testing purpose.
   //url = 'http://132.206.74.92:8002/';
-  url = 'http://10.121.50.212:5001/';
+  url = 'http://10.0.0.146:5001/';
   my_path = '';
   resized_img_path = '';
   // Image resize
@@ -677,7 +677,7 @@ class App extends Component {
         this.setState({phase: 'Approaching'});
         if (this.state.mode == 'Voice') {
           this.speak(
-            'Calibration complete, you are now ' +
+            'Entering appraoching phase, you are now ' +
               distances[0] +
               ' meters away. Door is ' +
               this.outputPositionText(angles[0]),
