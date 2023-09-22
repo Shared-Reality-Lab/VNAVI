@@ -90,6 +90,8 @@ class App extends Component {
     doorReadings: {
       dists: [],
       angles: [],
+      names: [],
+      centerXCoord: []
     },
     totalSpoken: 0,
     lastSpokenWords: '',
@@ -731,7 +733,25 @@ class App extends Component {
     }
   };
 
-  approachingPhase = (distances, angles) => {
+  approachingPhase = (distances, angles, names, centerXCoords) => {
+    //Indicate to the user if the door handle is on the right or left
+    if(names.length === 2){
+      if(centerXCoords[0] >= centerXCoords[1]){
+        if(names[0] === 'door'){
+          Tts.speak("Door handle is on the left.")
+        }
+        else{
+          Tts.speak("Door handle is on the right.")
+        }
+      }
+      else
+      if(names[0] === 'door'){
+        Tts.speak("Door handle is on the right.")
+      }
+      else{
+        Tts.speak("Door handle is on the left.")
+      }
+    }
     console.log('New detection');
     distances[0] = Math.round(distances[0] * 10) / 10;
     console.log(this.state.unknownReadings);
@@ -802,14 +822,21 @@ class App extends Component {
     //{"columns":["orie(clk)","dist(m)","conf"],"index":[0],"data":[[12,0,0.425]]}
     let distances = [];
     let angles = [];
+    let names = [];
+    let centerXCoords = [];
+
     for (let i = 0; i < res.index.length; i++) {
       let index = res.index[i];
       let data = res.data[index];
       let angle = data[0];
       let distance = data[1];
       let confidence = data[2];
+      let name = data[3];
+      let centerXCoord = data[4];
       distances.push(distance);
       angles.push(angle);
+      names.push(name);
+      centerXCoords.push(centerXCoord);
     }
 
     if (distances.length == 0) {
@@ -860,7 +887,7 @@ class App extends Component {
     } else if (this.state.phase == 'Calibrating') {
       this.calibratingPhase(distances, angles);
     } else {
-      this.approachingPhase(distances, angles);
+      this.approachingPhase(distances, angles, names, centerXCoords);
     }
   };
 

@@ -50,7 +50,8 @@ def parse_result(result):
     h = result.render()[0].shape[0]
     w = result.render()[0].shape[1]
     df = result.pandas().xyxy[0]
-    df = df.drop(df[df.name != 'door'].index)
+    df = df.drop(df[(df['name'] != 'handle') & (df['name'] != 'door')].index)
+    print(df)
     data_list = []
     for i in range(df.shape[0]):
         est_orientation = 0
@@ -75,13 +76,21 @@ def parse_result(result):
                 est_distance = 0
             else:
                 est_distance = 1.5 / dh_to_h_r
+
         data_list.insert(len(data_list),
                          [est_orientation,
                           float("{:.3f}".format(est_distance)),
-                          float("{:.3f}".format(confidence))])
-    new_df = pd.DataFrame(data_list, columns=['orie(clk)', 'dist(m)', 'conf'])
+                          float("{:.3f}".format(confidence)),
+                          df.iloc[i]['name'],
+                          float("{:.3f}".format((df.loc[i]['xmax'] + df.loc[i]['xmin'])/2))])
+    sorted_data_list = sorted(data_list, key=lambda x: x[1])
+    new_df = pd.DataFrame(sorted_data_list, columns=['orie(clk)', 'dist(m)', 'conf', 'name', 'center coords (x)'])
+    print('\n')
+    print(new_df)
     df_json = new_df.to_json(orient='split')
     res_json = json.loads(df_json)
+    print('\n')
+    print(res_json)
     return json.dumps(res_json, indent=4), new_df
 
 
