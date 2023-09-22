@@ -75,29 +75,19 @@ const SensorDisplay = (props) => {
     const gyroscopeSubscription = gyroscope.subscribe(({ x, y, z, timestamp }) => {
       setGyroscopeData({ x, y, z, timestamp });
       //Angles of tilt x, y, z axis
-      var newYAngleVar = 0;
-      var newXAngleVar = 0;
-      var newZAngleVar = 0;
+      const dt = GYROSCOPE_RATE/1000
 
-      newYAngleVar += yGyro*(GYROSCOPE_RATE/1000);
-      newXAngleVar += xGyro*(GYROSCOPE_RATE/1000);
-      newZAngleVar += zGyro*(GYROSCOPE_RATE/1000);
+      var yDegrees = y * (180/Math.PI) * dt;
+      var xDegrees = x * (180/Math.PI) * dt;
+      var zDegrees = z * (180/Math.PI) * dt;
+
+      setYTilt(yTilt+yDegrees*1.7);
+      setXTilt(xTilt+xDegrees*1.9);
+      setZTilt(zTilt+zDegrees*1.65);
 
       setYGyro(0);
       setXGyro(0);
       setZGyro(0);
-
-      newYAngleVar += y*(GYROSCOPE_RATE/1000);
-      newXAngleVar += x*(GYROSCOPE_RATE/1000);
-      newZAngleVar += z*(GYROSCOPE_RATE/1000);
-
-      var yDegrees =  3 * newYAngleVar * (180/Math.PI);
-      var xDegrees =  3 * newXAngleVar * (180/Math.PI);
-      var zDegrees =  3 * newZAngleVar * (180/Math.PI);
-
-      setYTilt(yTilt+yDegrees/2.48);
-      setXTilt(xTilt+xDegrees/1.48);
-      setZTilt(zTilt+zDegrees/2.48);
 
       if(props.data.length != 0){
         //Door tracking
