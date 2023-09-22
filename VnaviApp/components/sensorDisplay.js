@@ -46,11 +46,8 @@ const SensorDisplay = (props) => {
   const [gyroscopeHistory, setGyroscopeHistory] = useState(0);
   const [distanceTraveled, setDistanceTraveled] = useState(0);
   const [xVelocity, setXVelocity] = useState(0);
-  const [yGyro, setYGyro] = useState(0);
   const [yTilt, setYTilt] = useState(0);
-  const [xGyro, setXGyro] = useState(0);
   const [xTilt, setXTilt] = useState(0);
-  const [zGyro, setZGyro] = useState(0);
   const [zTilt, setZTilt] = useState(0);
   useEffect(() => {
     
@@ -84,10 +81,6 @@ const SensorDisplay = (props) => {
       setYTilt(yTilt+yDegrees*1.7);
       setXTilt(xTilt+xDegrees*1.9);
       setZTilt(zTilt+zDegrees*1.65);
-
-      setYGyro(0);
-      setXGyro(0);
-      setZGyro(0);
 
       if(props.data.length != 0){
         //Door tracking
