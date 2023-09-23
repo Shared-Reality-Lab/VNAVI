@@ -93,6 +93,10 @@ class App extends Component {
       names: [],
       centerXCoord: []
     },
+    multiDoorReadings:{
+      dists: [],
+      angles: []
+    },
     totalSpoken: 0,
     lastSpokenWords: '',
     numberOfSame: 0,
@@ -529,7 +533,38 @@ class App extends Component {
     }
   };
 
-  searchPhase = (distances, angles) => {
+  searchPhase = (distances, angles, names) => {
+    if(names.length >= 4){
+      let multiDoorDistances = [];
+      let multiDoorAngles = [];
+      for(let i = 0 ; i < names.length-1; i++){
+        //Check for door and handle pairs
+        if((names[i] === 'door' && names[i+1] === 'handle') || (names[i] === 'handle' && names[i+1] === 'door')){
+          console.log('Door and Handle Pair Found')
+          if(angles[i] === angles[i+1] || (angles[i] + 1) === angles[i+1] || angles[i] === (angles[i] + 1)){
+            console.log('Door and Handle Pair Found');
+            if(names[i] === 'door'){
+              multiDoorDistances.push(distances[i]);
+              multiDoorAngles.push(angles[i]);
+            }
+            else{
+              multiDoorDistances.push(distances[i+1]);
+              multiDoorAngles.push(angles[i+1]);
+            } 
+          }
+        }
+      }
+      console.log(multiDoorDistances);
+      //We have more than one door in front of us
+      if(multiDoorDistances.length >= 2){
+        this.state.multiDoorReadings.dists = multiDoorDistances;
+        this.state.multiDoorReadings.angles = multiDoorAngles;
+        this.setState({multiDoorReadings: this.state.multiDoorReadings});
+        this.setState({phase: 'Door Selection'});    
+        return;
+      }
+    }
+
     console.log('Door Detected');
     count++;
     distances[0] = Math.round(distances[0] * 10) / 10;
@@ -642,6 +677,20 @@ class App extends Component {
     }
   };
 
+  doorSelectionPhase = (multiDoorDistances, multiDoorAngles) => {
+    Tts.speak("Hey there are multiple doors in front of you.")
+    
+    for(let i = 1; i <= multiDoorDistances.length; i++){
+      //TTS can't pronounce is correctly so we switched to to es
+      Tts.speak("Door " + i + "es" + this.outputPositionText(multiDoorAngles[i-1]));
+    }
+    Tts.speak('Please select between the doors by saying the door number. Example: Door 1.');
+    //Wait for user input
+    
+    //Operations
+    //Return 1 door has to correspond with input of Calibration Phase
+  }
+  
   calibratingPhase = (distances, angles) => {
     console.log('Calibrating phase');
     distances[0] = Math.round(distances[0] * 10) / 10;
@@ -824,6 +873,7 @@ class App extends Component {
     let angles = [];
     let names = [];
     let centerXCoords = [];
+    
 
     for (let i = 0; i < res.index.length; i++) {
       let index = res.index[i];
@@ -881,9 +931,10 @@ class App extends Component {
     } else {
       this.setState({unknownReadings: 0});
     }
-
     if (this.state.phase == 'Searching') {
-      this.searchPhase(distances, angles);
+      this.searchPhase(distances, angles, names);
+    } else if(this.state.phase == 'Door Selection'){
+      this.doorSelectionPhase(this.state.multiDoorReadings.dists, this.state.multiDoorReadings.angles);
     } else if (this.state.phase == 'Calibrating') {
       this.calibratingPhase(distances, angles);
     } else {
