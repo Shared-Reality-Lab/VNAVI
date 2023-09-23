@@ -83,7 +83,7 @@ def parse_result(result):
                           float("{:.3f}".format(confidence)),
                           df.iloc[i]['name'],
                           float("{:.3f}".format((df.loc[i]['xmax'] + df.loc[i]['xmin'])/2))])
-    sorted_data_list = sorted(data_list, key=lambda x: x[0])
+    sorted_data_list = sorted(data_list, key=lambda x: x[1])
     new_df = pd.DataFrame(sorted_data_list, columns=['orie(clk)', 'dist(m)', 'conf', 'name', 'center coords (x)'])
     print('\n')
     print(new_df)
