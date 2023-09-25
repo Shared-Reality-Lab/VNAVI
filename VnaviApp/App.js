@@ -17,6 +17,7 @@ import Tts from 'react-native-tts';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import Sound from 'react-native-sound';
 import SensorDisplay from './components/sensorDisplay';
+import Voiceinput from './components/voiceInput';
 import {LogBox} from 'react-native';
 
 LogBox.ignoreAllLogs();
@@ -971,6 +972,7 @@ class App extends Component {
             </Text>
           </TouchableOpacity>
         </RNCamera>
+        <Voiceinput></Voiceinput>
         <SensorDisplay data={this.state.last_two_data} distanceHistory={distanceHistory} />
         <Text style={styles.text}>
           {(this.state.running ? this.state.phase + ' phase' : 'Not Running') +
