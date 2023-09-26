@@ -2,7 +2,7 @@ import React from 'react';
 import {View, Text, TouchableOpacity} from 'react-native';
 import Voice from '@react-native-voice/voice';
 
-const Voiceinput = () => {
+const Voiceinput = ( {onResult} ) => {
   const [result, setResult] = React.useState('');
   const [error, setError] = React.useState('');
   const [isRecording, setIsRecording] = React.useState(false);
@@ -11,7 +11,7 @@ const Voiceinput = () => {
   Voice.onSpeechStart = ()=> setIsRecording(true);
   Voice.onSpeechEnd = ()=> setIsRecording(false);
   Voice.onSpeechError = (err)=> setError(err.message);
-  Voice.onSpeechResults = result => setResult(result.value[0]);
+  Voice.onSpeechResults = result => onResult(result.value[0]);
    
   const startRecording = async ()=>{
     try{
@@ -32,9 +32,9 @@ const Voiceinput = () => {
 
   return (
     <View style={{alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.2)' }}>
-        <Text style={{fontSize:20, color: 'green', fontWeight: '500'}}>Voice Input:</Text>
+        {/* <Text style={{fontSize:20, color: 'green', fontWeight: '500'}}>Voice Input:</Text>
         <Text>{result}</Text>
-        <Text>{error}</Text>
+        <Text>{error}</Text> */}
         <TouchableOpacity 
           onPress={isRecording ? stopRecording : startRecording}> 
           <Text style={{color: 'red'}}>{isRecording ? 'Stop Recording' : 'Start Recording'}</Text>
@@ -43,4 +43,4 @@ const Voiceinput = () => {
   );
 };
 
-export default Voiceinput
+export default Voiceinput;

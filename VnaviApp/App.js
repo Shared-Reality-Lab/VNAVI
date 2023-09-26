@@ -104,6 +104,12 @@ class App extends Component {
     sounds: {},
     unknownReadings: 0,
     last_two_data: [],
+    result: '',
+  };
+
+  handleResult = (result) => {
+    //console.log(result);
+    this.setState({result});
   };
 
   setupSounds() {
@@ -131,7 +137,7 @@ class App extends Component {
     Tts.setDefaultLanguage('en-US');
     console.log('get init status');
     Tts.getInitStatus().then(() => {
-      Tts.speak('Hello, world!');
+      Tts.speak('Hello World!');
       console.log("said hello world");
     });
   };
@@ -686,11 +692,20 @@ class App extends Component {
       Tts.speak("Door " + i + "es" + this.outputPositionText(multiDoorAngles[i-1]));
     }
     Tts.speak('Please select between the doors by saying the door number. Example: Door 1.');
-    //Wait for user input
+    //Programmatically press the button to start the voice input
     
+    //Wait for user input
+    const doorNumber = result.match(/\d+/);
+    if (doorNumber <= multiDoorDistances.length && doorNumber > 0){
+      
+    }
+    else {
+      
+    }
+
+  };
     //Operations
     //Return 1 door has to correspond with input of Calibration Phase
-  }
   
   calibratingPhase = (distances, angles) => {
     console.log('Calibrating phase');
@@ -926,6 +941,7 @@ class App extends Component {
           this.setState({saved_state_data: this.state.saved_state_data});
           console.log('entered');
         }
+        
         // console.log('SAVED DATA: ' + this.state.saved_state_data);
       }
       return;
@@ -950,6 +966,7 @@ class App extends Component {
   };
 
   render() {
+    const {result} = this.state;
     return (
       <View style={styles.container}>
         <RNCamera
@@ -972,7 +989,10 @@ class App extends Component {
             </Text>
           </TouchableOpacity>
         </RNCamera>
-        <Voiceinput></Voiceinput>
+        <View>
+          <Text>{result}</Text>
+          <Voiceinput onResult={this.handleResult} />
+        </View>
         <SensorDisplay data={this.state.last_two_data} distanceHistory={distanceHistory} />
         <Text style={styles.text}>
           {(this.state.running ? this.state.phase + ' phase' : 'Not Running') +
