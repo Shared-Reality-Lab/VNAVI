@@ -293,6 +293,8 @@ PODS:
   - react-native-image-editor (2.3.0):
     - React
     - React-RCTImage
+  - react-native-voice (3.2.4):
+    - React-Core
   - React-perflogger (0.68.2)
   - React-RCTActionSheet (0.68.2):
     - React-Core/RCTActionSheetHeaders (= 0.68.2)
@@ -423,6 +425,7 @@ DEPENDENCIES:
   - React-logger (from `../node_modules/react-native/ReactCommon/logger`)
   - react-native-camera (from `../node_modules/react-native-camera`)
   - "react-native-image-editor (from `../node_modules/@react-native-community/image-editor`)"
+  - "react-native-voice (from `../node_modules/@react-native-voice/voice`)"
   - React-perflogger (from `../node_modules/react-native/ReactCommon/reactperflogger`)
   - React-RCTActionSheet (from `../node_modules/react-native/Libraries/ActionSheetIOS`)
   - React-RCTAnimation (from `../node_modules/react-native/Libraries/NativeAnimation`)
@@ -502,6 +505,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-camera"
   react-native-image-editor:
     :path: "../node_modules/@react-native-community/image-editor"
+  react-native-voice:
+    :path: "../node_modules/@react-native-voice/voice"
   React-perflogger:
     :path: "../node_modules/react-native/ReactCommon/reactperflogger"
   React-RCTActionSheet:
@@ -575,6 +580,7 @@ SPEC CHECKSUMS:
   React-logger: a0833912d93b36b791b7a521672d8ee89107aff1
   react-native-camera: 3eae183c1d111103963f3dd913b65d01aef8110f
   react-native-image-editor: 9361a215c3991cafbe5e7f28cbbad6e72c9c2705
+  react-native-voice: f5e8eec2278451d0017eb6a30a6ccc726aca34e0
   React-perflogger: a18b4f0bd933b8b24ecf9f3c54f9bf65180f3fe6
   React-RCTActionSheet: 547fe42fdb4b6089598d79f8e1d855d7c23e2162
   React-RCTAnimation: bc9440a1c37b06ae9ebbb532d244f607805c6034
@@ -599,4 +605,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: 12720c778981a46489fb22dc66e9b7644d85fa3b
 
-COCOAPODS: 1.12.1
+COCOAPODS: 1.12.0

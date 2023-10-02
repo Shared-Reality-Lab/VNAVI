@@ -99,7 +99,7 @@ const SensorDisplay = (props) => {
             } else {
               currentSegment = (currentSegment+clockSegments)%12 + 12;
             }
-            //console.log("Estimation: " + currentSegment);
+            //console.log("Estimation: ");
             count++;
             if(count >= 60){
               if(count >= 100){
@@ -107,14 +107,34 @@ const SensorDisplay = (props) => {
                   Tts.stop();
                   Tts.speak("Door lost, calculating position");
                   Tts.speak("Door last seen at " + currentSegment.toString() + "o'clock");
+                } else {
+                  if(doorExpectation == 'lost'){
+                    if(currentSegment == 12){
+                      Tts.stop();
+                      Tts.speak("Door should be in front, reach out for the handle");
+                    } else {
+                      Tts.speak("Door lost, but you are very close");
+                      Tts.speak("Door last seen at " + currentSegment.toString() + "o'clock");
+                    }
+                  } else if(doorExpectation == 'arrived'){
+                    if(currentSegment == 12 ||currentSegment == 11||currentSegment == 1){
+                      Tts.stop();
+                      Tts.speak("Door should be in front, reach out for the handle");
+                    } else {
+                      Tts.speak("Door should be very near");
+                      if(currentSegment == 10 || currentSegment == 9){
+                        Tts.speak("on your left");
+                      } else if (currentSegment == 2 || currentSegment == 3){
+                        Tts.speak("on your right");
+                      } else {
+                        Tts.speak("Door last seen at " + currentSegment.toString() + "o'clock");
+                      }
+                    }
+                  }
                 }
                 // Tts.stop();
                 // Tts.speak("Door lost, calculating position");
                 // Tts.speak("Door last seen at " + currentSegment.toString() + "o'clock");
-              } else {
-                if(props.distanceHistory.length < 1){
-                  Tts.speak("Door last seen at " + currentSegment.toString() + "o'clock");
-                }
               }
               count = 0;
             }

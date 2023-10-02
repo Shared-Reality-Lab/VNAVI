@@ -67,13 +67,13 @@ const instructions =
   'The beeps are also spatialized relatively to the direction of the door, so a door slightly to the left will produce a beep panned ' +
   'to the left. Press the TAKE STREAM AND PRODUCE OUTPUT button below to start the stream and hit the STOP STREAM to stop. Happy navigation!';
 
-const distanceHistory = [];
+distanceHistory = [];
 var reachForHandle = false;
 
 class App extends Component {
   // Change this url to the server's IP:PORT, 10.0.2.2 is for AVD localhost testing purpose.
   //url = 'http://132.206.74.92:8002/';
-  url = 'http://10.0.0.146:5001/';
+  //url = 'http://10.0.0.146:5001/';
   my_path = '';
   resized_img_path = '';
   // Image resize
@@ -88,6 +88,8 @@ class App extends Component {
     mode: 'Voice',
     speaking: false,
     phase: 'Searching',
+    handleSpoken: false,
+    doorExpectation: 'undefined',
     doorReadings: {
       dists: [],
       angles: [],
@@ -260,7 +262,7 @@ class App extends Component {
           // .then(res => checkStatus(res))
           .then(res => res.json())
           .then(res => {
-            console.log('response' + JSON.stringify(res));
+            //console.log('response' + JSON.stringify(res));
             Alert.alert('Results:', JSON.stringify(res));
           })
           .catch(e => console.log(e))
@@ -324,7 +326,7 @@ class App extends Component {
             // .then(res => checkStatus(res))
             .then(res => res.json())
             .then(res => {
-              console.log('response' + JSON.stringify(res));
+              //console.log('response' + JSON.stringify(res));
               if (last_two_data[0] == null) {
                 if (res.data[0] == undefined) {
                   last_two_data[0] = 'no door';
@@ -382,10 +384,11 @@ class App extends Component {
     }
   };
   isDecreasingTrend(points) {
+    console.log(points);
+
     if (points.length < 2) {
         return false;
     }
-    
     let totalX = 0;
     let totalY = 0;
     let xySum = 0;
@@ -541,6 +544,7 @@ class App extends Component {
   };
 
   searchPhase = (distances, angles, names) => {
+    console.log("searching phase");
     if(names.length >= 4){
       let multiDoorDistances = [];
       let multiDoorAngles = [];
@@ -574,7 +578,7 @@ class App extends Component {
 
     console.log('Door Detected');
     count++;
-    distances[0] = Math.round(distances[0] * 10) / 10;
+    //distances[0] = Math.round(distances[0] * 10) / 10;
     console.log(distances[0] + ' meters away');
     this.state.doorReadings.dists.push(distances[0]);
     this.state.doorReadings.angles.push(angles[0]);
@@ -709,7 +713,7 @@ class App extends Component {
   
   calibratingPhase = (distances, angles) => {
     console.log('Calibrating phase');
-    distances[0] = Math.round(distances[0] * 10) / 10;
+    //distances[0] = Math.round(distances[0] * 10) / 10;
     console.log(distances[0] + ' meters away');
     this.state.doorReadings.dists.push(distances[0]);
     this.state.doorReadings.angles.push(angles[0]);
@@ -744,7 +748,7 @@ class App extends Component {
         this.setState({phase: 'Approaching'});
         if (this.state.mode == 'Voice') {
           this.speak(
-            'Entering appraoching phase, you are now ' +
+            'Entering approaching phase, you are now ' +
               distances[0] +
               ' meters away. Door is ' +
               this.outputPositionText(angles[0]),
@@ -800,7 +804,8 @@ class App extends Component {
 
   approachingPhase = (distances, angles, names, centerXCoords) => {
     //Indicate to the user if the door handle is on the right or left
-    if(names.length === 2){
+    if(names.length === 2 && !this.state.handleSpoken){
+      this.setState({handleSpoken: true});
       if(centerXCoords[0] >= centerXCoords[1]){
         if(names[0] === 'door'){
           Tts.speak("Door handle is on the left.")
@@ -817,11 +822,13 @@ class App extends Component {
         Tts.speak("Door handle is on the left.")
       }
     }
-    console.log('New detection');
-    distances[0] = Math.round(distances[0] * 10) / 10;
-    console.log(this.state.unknownReadings);
-    distanceHistory.push(distances[0]);
-    console.log(distanceHistory);
+    // console.log('New detection');
+    //distances[0] = Math.round(distances[0] * 10) / 10;
+    console.log("approaching phase");
+    if(distances[0] < 3){
+      distanceHistory.push(distances[0]);
+    }
+    //console.log(distanceHistory);
     console.log(distances[0] + ' meters away');
     this.state.doorReadings.dists.push(distances[0]);
     this.state.doorReadings.angles.push(angles[0]);
@@ -912,13 +919,15 @@ class App extends Component {
         if(this.isDecreasingTrend(distanceHistory)) {
           if(!reachForHandle){
             str = "Reach out for the handle.";
+            this.setState({doorExpectation: 'arrived'});
           }
           reachForHandle = true;
         } else {
           str = "Door lost.";
+          this.setState({doorExpectation: 'lost'});
         }
         //Tts.stop()
-        Tts.speak(str)
+        //Tts.speak(str)
         distanceHistory = [];
       }
       door_found = false;
@@ -993,7 +1002,7 @@ class App extends Component {
           <Text>{result}</Text>
           <Voiceinput onResult={this.handleResult} />
         </View>
-        <SensorDisplay data={this.state.last_two_data} distanceHistory={distanceHistory} />
+        <SensorDisplay data={this.state.last_two_data} distanceHistory={distanceHistory} doorExpectation={this.state.doorExpectation}/>
         <Text style={styles.text}>
           {(this.state.running ? this.state.phase + ' phase' : 'Not Running') +
             ':' +
