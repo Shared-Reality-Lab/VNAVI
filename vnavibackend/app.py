@@ -7,7 +7,12 @@ import io
 import json
 import pandas as pd
 app = Flask(__name__)
+import os
 
+if os.path.isfile("yolov5_models/door_detect/best.pt"):
+    print("Model file exists")
+else:
+    print("Model file not found")
 model = torch.hub.load("ultralytics/yolov5", "custom", path="yolov5_models/door_detect/best.pt", force_reload=True)
 
 
@@ -18,7 +23,6 @@ def extract_image(request_in):
     if file.filename == '':
         raise BadRequest("File name is invalid.")
     return file
-
 
 @app.route('/')
 def hello_world():
@@ -106,4 +110,4 @@ def detect_res_json():
 
 
 if __name__ == '__main__':
-    app.run(debug=False, host='10.0.0.146', port=5001)
+    app.run(debug=False, host='0.0.0.0', port=5001)
