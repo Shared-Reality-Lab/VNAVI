@@ -44,7 +44,6 @@ const SensorDisplay = (props) => {
   const [gyroscopeData, setGyroscopeData] = useState({ x: 0, y: 0, z: 0, timestamp: 0 });
   const [angleHistory, setAngleHistory] = useState(0);
   const [gyroscopeHistory, setGyroscopeHistory] = useState(0);
-  const [distanceTraveled, setDistanceTraveled] = useState(0);
   const [xVelocity, setXVelocity] = useState(0);
   const [yTilt, setYTilt] = useState(0);
   const [xTilt, setXTilt] = useState(0);
@@ -58,14 +57,6 @@ const SensorDisplay = (props) => {
       //   setAccelerometerData({ x, y, z, timestamp });
       //   return;
       // }
-
-      var accelerationX = x * Math.cos(xTilt);
-      // Calculate distance based on acceleration (simplified calculation)
-      var deltaT = 0.1; // 100 milliseconds in seconds
-      // Integrate for velocity
-      var newVelocityX =  0.5 + accelerationX * deltaT;
-      var distanceX = newVelocityX * deltaT;
-      setDistanceTraveled(distanceTraveled + distanceX);
     }
   );
   
@@ -153,7 +144,7 @@ const SensorDisplay = (props) => {
       accelerometerSubscription.unsubscribe();
       gyroscopeSubscription.unsubscribe();
     };
-  }, [gyroscopeData, accelerometerData, distanceTraveled]);
+  }, [gyroscopeData, accelerometerData]);
 
   return (
     <View style={{ position:'absolute', backgroundColor: 'rgba(255,255,255,0.2)' }}>
@@ -167,7 +158,6 @@ const SensorDisplay = (props) => {
         <Text>y: {gyroscopeData.y.toFixed(2)}</Text>
         <Text>z: {gyroscopeData.z.toFixed(2)}</Text>
 
-        <Text>Distance Traveled: {distanceTraveled.toFixed(2)} meters</Text>
         <Text>Door is at: {angleHistory.toFixed(2)} degrees</Text>
         <Text>Phone X Tilt {xTilt.toFixed(2)} degrees</Text>
         <Text>Phone Y Tilt {yTilt.toFixed(2)} degrees</Text>
