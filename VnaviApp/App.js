@@ -139,6 +139,7 @@ class App extends Component {
     Tts.setDefaultLanguage('en-US');
     console.log('get init status');
     Tts.getInitStatus().then(() => {
+      Tts.setDefaultRate(0.75);
       Tts.speak('Hello World!');
       console.log("said hello world");
     });
