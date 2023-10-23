@@ -94,11 +94,11 @@ class App extends Component {
       dists: [],
       angles: [],
       names: [],
-      centerXCoord: []
+      centerXCoord: [],
     },
-    multiDoorReadings:{
+    multiDoorReadings: {
       dists: [],
-      angles: []
+      angles: [],
     },
     totalSpoken: 0,
     lastSpokenWords: '',
@@ -109,7 +109,7 @@ class App extends Component {
     result: '',
   };
 
-  handleResult = (result) => {
+  handleResult = result => {
     //console.log(result);
     this.setState({result});
   };
@@ -141,7 +141,7 @@ class App extends Component {
     Tts.getInitStatus().then(() => {
       Tts.setDefaultRate(0.75);
       Tts.speak('Hello World!');
-      console.log("said hello world");
+      console.log('said hello world');
     });
   };
 
@@ -388,24 +388,26 @@ class App extends Component {
     console.log(points);
 
     if (points.length < 2) {
-        return false;
+      return false;
     }
     let totalX = 0;
     let totalY = 0;
     let xySum = 0;
     let xSquaredSum = 0;
-    
+
     for (let i = 0; i < points.length; i++) {
-        totalX += i;
-        totalY += points[i];
-        xySum += i * points[i];
-        xSquaredSum += i * i;
+      totalX += i;
+      totalY += points[i];
+      xySum += i * points[i];
+      xSquaredSum += i * i;
     }
-    
-    const slope = (points.length * xySum - totalX * totalY) / (points.length * xSquaredSum - totalX * totalX);
-    
+
+    const slope =
+      (points.length * xySum - totalX * totalY) /
+      (points.length * xSquaredSum - totalX * totalX);
+
     return slope < 0;
-}
+  }
 
   speakInstructions = words => {
     Tts.setDefaultRate(0.5);
@@ -545,34 +547,40 @@ class App extends Component {
   };
 
   searchPhase = (distances, angles, names) => {
-    console.log("searching phase");
-    if(names.length >= 4){
+    console.log('searching phase');
+    if (names.length >= 4) {
       let multiDoorDistances = [];
       let multiDoorAngles = [];
-      for(let i = 0 ; i < names.length-1; i++){
+      for (let i = 0; i < names.length - 1; i++) {
         //Check for door and handle pairs
-        if((names[i] === 'door' && names[i+1] === 'handle') || (names[i] === 'handle' && names[i+1] === 'door')){
-          console.log('Door and Handle Pair Found')
-          if(angles[i] === angles[i+1] || (angles[i] + 1) === angles[i+1] || angles[i] === (angles[i] + 1)){
+        if (
+          (names[i] === 'door' && names[i + 1] === 'handle') ||
+          (names[i] === 'handle' && names[i + 1] === 'door')
+        ) {
+          console.log('Door and Handle Pair Found');
+          if (
+            angles[i] === angles[i + 1] ||
+            angles[i] + 1 === angles[i + 1] ||
+            angles[i] === angles[i] + 1
+          ) {
             console.log('Door and Handle Pair Found');
-            if(names[i] === 'door'){
+            if (names[i] === 'door') {
               multiDoorDistances.push(distances[i]);
               multiDoorAngles.push(angles[i]);
+            } else {
+              multiDoorDistances.push(distances[i + 1]);
+              multiDoorAngles.push(angles[i + 1]);
             }
-            else{
-              multiDoorDistances.push(distances[i+1]);
-              multiDoorAngles.push(angles[i+1]);
-            } 
           }
         }
       }
       console.log(multiDoorDistances);
       //We have more than one door in front of us
-      if(multiDoorDistances.length >= 2){
+      if (multiDoorDistances.length >= 2) {
         this.state.multiDoorReadings.dists = multiDoorDistances;
         this.state.multiDoorReadings.angles = multiDoorAngles;
         this.setState({multiDoorReadings: this.state.multiDoorReadings});
-        this.setState({phase: 'Door Selection'});    
+        this.setState({phase: 'Door Selection'});
         return;
       }
     }
@@ -616,7 +624,8 @@ class App extends Component {
         this.relativeDiff(distances[0], dist_prev) < 0.5 &&
         Math.abs(angles[0] - ang_prev) <= 2
       ) {
-        if (distances[0] > 2) {``
+        if (distances[0] > 2) {
+          ``;
           // we are more than 2 meters away
           if (this.state.mode == 'Voice') {
             if (count > 3 || !door_found) {
@@ -690,28 +699,28 @@ class App extends Component {
   };
 
   doorSelectionPhase = (multiDoorDistances, multiDoorAngles) => {
-    Tts.speak("Hey there are multiple doors in front of you.")
-    
-    for(let i = 1; i <= multiDoorDistances.length; i++){
+    Tts.speak('Hey there are multiple doors in front of you.');
+
+    for (let i = 1; i <= multiDoorDistances.length; i++) {
       //TTS can't pronounce is correctly so we switched to to es
-      Tts.speak("Door " + i + "es" + this.outputPositionText(multiDoorAngles[i-1]));
+      Tts.speak(
+        'Door ' + i + 'es' + this.outputPositionText(multiDoorAngles[i - 1]),
+      );
     }
-    Tts.speak('Please select between the doors by saying the door number. Example: Door 1.');
+    Tts.speak(
+      'Please select between the doors by saying the door number. Example: Door 1.',
+    );
     //Programmatically press the button to start the voice input
-    
+
     //Wait for user input
     const doorNumber = result.match(/\d+/);
-    if (doorNumber <= multiDoorDistances.length && doorNumber > 0){
-      
+    if (doorNumber <= multiDoorDistances.length && doorNumber > 0) {
+    } else {
     }
-    else {
-      
-    }
-
   };
-    //Operations
-    //Return 1 door has to correspond with input of Calibration Phase
-  
+  //Operations
+  //Return 1 door has to correspond with input of Calibration Phase
+
   calibratingPhase = (distances, angles) => {
     console.log('Calibrating phase');
     //distances[0] = Math.round(distances[0] * 10) / 10;
@@ -805,28 +814,24 @@ class App extends Component {
 
   approachingPhase = (distances, angles, names, centerXCoords) => {
     //Indicate to the user if the door handle is on the right or left
-    if(names.length === 2 && !this.state.handleSpoken){
+    if (names.length === 2 && !this.state.handleSpoken) {
       this.setState({handleSpoken: true});
-      if(centerXCoords[0] >= centerXCoords[1]){
-        if(names[0] === 'door'){
-          Tts.speak("Door handle is on the left.")
+      if (centerXCoords[0] >= centerXCoords[1]) {
+        if (names[0] === 'door') {
+          Tts.speak('Door handle is on the left.');
+        } else {
+          Tts.speak('Door handle is on the right.');
         }
-        else{
-          Tts.speak("Door handle is on the right.")
-        }
-      }
-      else
-      if(names[0] === 'door'){
-        Tts.speak("Door handle is on the right.")
-      }
-      else{
-        Tts.speak("Door handle is on the left.")
+      } else if (names[0] === 'door') {
+        Tts.speak('Door handle is on the right.');
+      } else {
+        Tts.speak('Door handle is on the left.');
       }
     }
     // console.log('New detection');
     //distances[0] = Math.round(distances[0] * 10) / 10;
-    console.log("approaching phase");
-    if(distances[0] < 3){
+    console.log('approaching phase');
+    if (distances[0] < 3) {
       distanceHistory.push(distances[0]);
     }
     //console.log(distanceHistory);
@@ -845,20 +850,20 @@ class App extends Component {
     // if (distances[0] > 2) {
     //   // we are greater than 2 meters away, which is impossible in the approaching phase
     //   console.log('Invalid reading');
-    // } 
+    // }
     // if (distances[0] > 0.5 && distances[0] < 2) {
-      // we are between 0.5 and 2 meters away
-      if (this.state.mode == 'Voice') {
-        //Tts.stop();
-        // Tts.speak(
-        //   'Only ' +
-        //     distances[0] +
-        //     ' meters away, Try to reach for the door, ' +
-        //     this.outputPositionText(angles[0]),
-        //);
-      } else {
-        this.beepBasedOnDistanceAndAngle(distances[0], angles[0]);
-      }
+    // we are between 0.5 and 2 meters away
+    if (this.state.mode == 'Voice') {
+      //Tts.stop();
+      // Tts.speak(
+      //   'Only ' +
+      //     distances[0] +
+      //     ' meters away, Try to reach for the door, ' +
+      //     this.outputPositionText(angles[0]),
+      //);
+    } else {
+      this.beepBasedOnDistanceAndAngle(distances[0], angles[0]);
+    }
     //}
     // if (distances[0] < 0.5) {
     //   // we are less than 0.5 meters away
@@ -897,7 +902,6 @@ class App extends Component {
     let angles = [];
     let names = [];
     let centerXCoords = [];
-    
 
     for (let i = 0; i < res.index.length; i++) {
       let index = res.index[i];
@@ -916,15 +920,15 @@ class App extends Component {
     if (distances.length == 0) {
       //As long as we have no results we won't be entering the search phase
       if (distanceHistory.length > 5) {
-        str = "";
-        if(this.isDecreasingTrend(distanceHistory)) {
-          if(!reachForHandle){
-            str = "Reach out for the handle.";
+        str = '';
+        if (this.isDecreasingTrend(distanceHistory)) {
+          if (!reachForHandle) {
+            str = 'Reach out for the handle.';
             this.setState({doorExpectation: 'arrived'});
           }
           reachForHandle = true;
         } else {
-          str = "Door lost.";
+          str = 'Door lost.';
           this.setState({doorExpectation: 'lost'});
         }
         //Tts.stop()
@@ -951,7 +955,7 @@ class App extends Component {
           this.setState({saved_state_data: this.state.saved_state_data});
           console.log('entered');
         }
-        
+
         // console.log('SAVED DATA: ' + this.state.saved_state_data);
       }
       return;
@@ -960,8 +964,11 @@ class App extends Component {
     }
     if (this.state.phase == 'Searching') {
       this.searchPhase(distances, angles, names);
-    } else if(this.state.phase == 'Door Selection'){
-      this.doorSelectionPhase(this.state.multiDoorReadings.dists, this.state.multiDoorReadings.angles);
+    } else if (this.state.phase == 'Door Selection') {
+      this.doorSelectionPhase(
+        this.state.multiDoorReadings.dists,
+        this.state.multiDoorReadings.angles,
+      );
     } else if (this.state.phase == 'Calibrating') {
       this.calibratingPhase(distances, angles);
     } else {
@@ -1003,7 +1010,11 @@ class App extends Component {
           <Text>{result}</Text>
           <Voiceinput onResult={this.handleResult} />
         </View>
-        <SensorDisplay data={this.state.last_two_data} distanceHistory={distanceHistory} doorExpectation={this.state.doorExpectation}/>
+        <SensorDisplay
+          data={this.state.last_two_data}
+          distanceHistory={distanceHistory}
+          doorExpectation={this.state.doorExpectation}
+        />
         <Text style={styles.text}>
           {(this.state.running ? this.state.phase + ' phase' : 'Not Running') +
             ':' +
