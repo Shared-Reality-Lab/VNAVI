@@ -10,7 +10,37 @@ import numpy as np
 app = Flask(__name__)
 import os
 from colorthief import ColorThief
+from scipy.spatial.distance import cdist
 
+custom_colors = np.array([
+    [255, 0, 0],    # Red
+    [0, 255, 0],    # Green
+    [0, 0, 255],    # Blue
+    [255, 255, 0],  # Yellow
+    [0, 255, 255],   # Cyan
+    [255, 0, 255],   # Magenta
+    [255, 153, 204], # Pink
+    [150, 75, 0],    # Brown
+    [255, 255, 255],  # White
+    [0, 0, 0],  # Black
+    [128, 128, 128],  # Gray
+    [128, 0, 128],  # Purple  
+])
+
+color_names = np.array([
+    'Red',
+    'Green',
+    'Blue',
+    'Yellow',
+    'Cyan',
+    'Magenta',
+    'Pink',
+    'Brown',
+    'White',
+    'Black',
+    'Gray',
+    'Purple',
+])
 
 if os.path.isfile("yolov5_models/door_detect/best.pt"):
     print("Model file exists")
@@ -92,15 +122,19 @@ def parse_result(result):
             cropped_img.save('cropped_img.jpg')
             color_thief = ColorThief('cropped_img.jpg')
             dominant_color = color_thief.get_color(quality=1)
-            print(dominant_color)
+            distances = cdist(custom_colors, [dominant_color])
+            closest_color_index = np.argmin(distances)
+            closest_color = color_names[closest_color_index]
+            print(closest_color)
             data_list.insert(len(data_list),
                             [est_orientation,
                             float("{:.3f}".format(est_distance)),
                             float("{:.3f}".format(confidence)),
                             df.iloc[i]['name'],
-                            float("{:.3f}".format((df.loc[i]['xmax'] + df.loc[i]['xmin'])/2))])
+                            float("{:.3f}".format((df.loc[i]['xmax'] + df.loc[i]['xmin'])/2)),
+                            closest_color])
     sorted_data_list = sorted(data_list, key=lambda x: x[0])
-    new_df = pd.DataFrame(sorted_data_list, columns=['orie(clk)', 'dist(m)', 'conf', 'name', 'center coords (x)'])
+    new_df = pd.DataFrame(sorted_data_list, columns=['orie(clk)', 'dist(m)', 'conf', 'name', 'center coords (x)', 'color'])
     print('\n')
     print(new_df)
     df_json = new_df.to_json(orient='split')
