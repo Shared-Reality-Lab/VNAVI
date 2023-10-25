@@ -6,8 +6,11 @@ import cv2
 import io
 import json
 import pandas as pd
+import numpy as np
 app = Flask(__name__)
 import os
+from colorthief import ColorThief
+
 
 if os.path.isfile("yolov5_models/door_detect/best.pt"):
     print("Model file exists")
@@ -24,6 +27,7 @@ def extract_image(request_in):
         raise BadRequest("File name is invalid.")
     return file
 
+
 @app.route('/')
 def hello_world():
     return '<h1>Welcome to VNAVI!</h1>'
@@ -35,7 +39,7 @@ def detect():
     image = Image.open(io.BytesIO(file.read()))
     result = model(image, size=1280)
     h = result.render()[0].shape[0]
-    y0 = int(0.1 * h)
+    y0 = int(0.1 * h)        
     _, result_df = parse_result(result)
     result_message = str(result_df)
     result.render()
@@ -80,13 +84,21 @@ def parse_result(result):
                 est_distance = 0
             else:
                 est_distance = 1.5 / dh_to_h_r
-
-        data_list.insert(len(data_list),
-                         [est_orientation,
-                          float("{:.3f}".format(est_distance)),
-                          float("{:.3f}".format(confidence)),
-                          df.iloc[i]['name'],
-                          float("{:.3f}".format((df.loc[i]['xmax'] + df.loc[i]['xmin'])/2))])
+        if i in df.index:
+            file = extract_image(request)
+            image = Image.open(file)
+            xmin, ymin, xmax, ymax = df.iloc[i]['xmin'], df.iloc[i]['ymin'], df.iloc[i]['xmax'], df.iloc[i]['ymax']
+            cropped_img = image.crop((xmin, ymin, xmax, ymax))
+            cropped_img.save('cropped_img.jpg')
+            color_thief = ColorThief('cropped_img.jpg')
+            dominant_color = color_thief.get_color(quality=1)
+            print(dominant_color)
+            data_list.insert(len(data_list),
+                            [est_orientation,
+                            float("{:.3f}".format(est_distance)),
+                            float("{:.3f}".format(confidence)),
+                            df.iloc[i]['name'],
+                            float("{:.3f}".format((df.loc[i]['xmax'] + df.loc[i]['xmin'])/2))])
     sorted_data_list = sorted(data_list, key=lambda x: x[0])
     new_df = pd.DataFrame(sorted_data_list, columns=['orie(clk)', 'dist(m)', 'conf', 'name', 'center coords (x)'])
     print('\n')
