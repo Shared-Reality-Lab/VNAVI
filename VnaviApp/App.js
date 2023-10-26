@@ -73,7 +73,7 @@ var reachForHandle = false;
 class App extends Component {
   // Change this url to the server's IP:PORT, 10.0.2.2 is for AVD localhost testing purpose.
   //url = 'http://132.206.74.92:8002/';
-  //url = 'http://10.0.0.146:5001/';
+  //url = 'http://192.168.1.92:5001/';
   my_path = '';
   resized_img_path = '';
   // Image resize
@@ -281,6 +281,7 @@ class App extends Component {
   takeStream = async () => {
     // Modified above to take multiple images and pass them to AudioFeedback
     const last_two_data = [];
+    bad_read = false;
     if (this.state.running) {
       return;
     }
@@ -327,32 +328,39 @@ class App extends Component {
             // .then(res => checkStatus(res))
             .then(res => res.json())
             .then(res => {
+              if(res.data[0][1] > 30){
+                bad_read = true;
+
+              }
               //console.log('response' + JSON.stringify(res));
-              if (last_two_data[0] == null) {
-                if (res.data[0] == undefined) {
-                  last_two_data[0] = 'no door';
+              if(!bad_read){
+                if (last_two_data[0] == null) {
+                  if (res.data[0] == undefined) {
+                    last_two_data[0] = 'no door';
+                  } else {
+                    last_two_data[0] = res.data[0][0];
+                    last_two_data[2] = res.data[0][0];
+                  }
+                } else if (last_two_data[1] == null) {
+                  if (res.data[0] == undefined) {
+                    last_two_data[1] = 'no door';
+                  } else {
+                    last_two_data[1] = res.data[0][0];
+                    last_two_data[2] = res.data[0][0];
+                  }
                 } else {
-                  last_two_data[0] = res.data[0][0];
-                  last_two_data[2] = res.data[0][0];
-                }
-              } else if (last_two_data[1] == null) {
-                if (res.data[0] == undefined) {
-                  last_two_data[1] = 'no door';
-                } else {
-                  last_two_data[1] = res.data[0][0];
-                  last_two_data[2] = res.data[0][0];
-                }
-              } else {
-                last_two_data[0] = last_two_data[1];
-                if (res.data[0] == undefined) {
-                  last_two_data[1] = 'no door';
-                } else {
-                  last_two_data[1] = res.data[0][0];
-                  last_two_data[2] = res.data[0][0];
+                  last_two_data[0] = last_two_data[1];
+                  if (res.data[0] == undefined) {
+                    last_two_data[1] = 'no door';
+                  } else {
+                    last_two_data[1] = res.data[0][0];
+                    last_two_data[2] = res.data[0][0];
+                  }
                 }
               }
-              console.log('Last 2 data: ' + last_two_data);
-              this.outputResult(res, last_two_data);
+              if(!bad_read){
+                this.outputResult(res, last_two_data);
+              }
             })
             .catch(e => console.log(e))
             .done();
@@ -362,10 +370,14 @@ class App extends Component {
             'Failed to take picture: ' + (err.message || err),
           );
         } finally {
-          this.setState({takingPic: false});
+          if(!bad_read){
+            this.setState({takingPic: false});
+          }
         }
       }
-      this.setState({last_two_data: last_two_data});
+      if(!bad_read){
+        this.setState({last_two_data: last_two_data});
+      }
       await this.delay(0);
     }
   };
