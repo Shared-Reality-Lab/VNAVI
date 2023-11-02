@@ -922,17 +922,20 @@ class App extends Component {
     let centerXCoords = [];
 
     for (let i = 0; i < res.index.length; i++) {
-      let index = res.index[i];
-      let data = res.data[index];
-      let angle = data[0];
-      let distance = data[1];
-      let confidence = data[2];
-      let name = data[3];
-      let centerXCoord = data[4];
-      distances.push(distance);
-      angles.push(angle);
-      names.push(name);
-      centerXCoords.push(centerXCoord);
+      // only save result if name is door
+      if (res.data[res.index[i]][3] === 'door') {
+        let index = res.index[i];
+        let data = res.data[index];
+        let angle = data[0];
+        let distance = data[1];
+        let confidence = data[2];
+        let name = data[3];
+        let centerXCoord = data[4];
+        distances.push(distance);
+        angles.push(angle);
+        names.push(name);
+        centerXCoords.push(centerXCoord);
+      }
     }
 
     if (distances.length == 0) {
