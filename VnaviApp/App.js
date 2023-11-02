@@ -376,9 +376,7 @@ class App extends Component {
             'Failed to take picture: ' + (err.message || err),
           );
         } finally {
-          if (!bad_read) {
-            this.setState({takingPic: false});
-          }
+          this.setState({takingPic: false});
         }
       }
       if (!bad_read) {
