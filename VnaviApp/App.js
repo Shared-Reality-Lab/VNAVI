@@ -1061,24 +1061,20 @@ class App extends Component {
         <TouchableOpacity
           activeOpacity={0.5}
           style={styles.button}
-          onPress={this.takeStream}>
+          onPress={() => {
+            this.state.running ? this.stopStream() : this.takeStream();
+          }}>
           <Text
             style={{
               alignItems: 'center',
               color: '#ffffff',
               fontWeight: 'bold',
             }}>
-            TAKE STREAM AND PRODUCE OUTPUT
+            {this.state.running ? 'STOP STREAM' : 'TAKE STREAM'}
           </Text>
         </TouchableOpacity>
         <Button
-          title="Stop stream"
-          onPress={() => {
-            this.stopStream();
-          }}
-        />
-        <Button
-          title="Toggle mode"
+          title={this.state.mode + ' mode'}
           onPress={() => {
             this.setState({
               mode: this.state.mode == 'Voice' ? 'Beep' : 'Voice',
