@@ -119,6 +119,7 @@ def parse_result(result):
             image = Image.open(file)
             xmin, ymin, xmax, ymax = df.iloc[i]['xmin'], df.iloc[i]['ymin'], df.iloc[i]['xmax'], df.iloc[i]['ymax']
             cropped_img = image.crop((xmin, ymin, xmax, ymax))
+            cropped_img = cropped_img.convert("RGB")
             cropped_img.save('cropped_img.jpg')
             color_thief = ColorThief('cropped_img.jpg')
             dominant_color = color_thief.get_color(quality=1)
