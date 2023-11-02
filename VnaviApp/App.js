@@ -326,9 +326,16 @@ class App extends Component {
             body: body,
           })
             // .then(res => checkStatus(res))
-            .then(res => res.json())
             .then(res => {
-              if (res.data[0][1] > 30) {
+              return res.json();
+            })
+            .then(res => {
+              if (
+                res.data &&
+                res.data[0] &&
+                res.data[0][1] &&
+                res.data[0][1] > 30
+              ) {
                 bad_read = true;
               }
               //console.log('response' + JSON.stringify(res));
