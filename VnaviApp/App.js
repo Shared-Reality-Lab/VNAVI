@@ -73,7 +73,9 @@ var reachForHandle = false;
 class App extends Component {
   // Change this url to the server's IP:PORT, 10.0.2.2 is for AVD localhost testing purpose.
   //url = 'http://132.206.74.92:8002/';
-  url = 'https://martian.cim.mcgill.ca/vnavi/';
+  //url = 'https://martian.cim.mcgill.ca/vnavi/';
+  url = 'http://192.168.1.92:5001/';
+
   my_path = '';
   resized_img_path = '';
   // Image resize
@@ -332,6 +334,7 @@ class App extends Component {
               return res.json();
             })
             .then(res => {
+              console.log(res);
               if (
                 res.data &&
                 res.data[0] &&
@@ -575,7 +578,7 @@ class App extends Component {
           (names[i] === 'door' && names[i + 1] === 'handle') ||
           (names[i] === 'handle' && names[i + 1] === 'door')
         ) {
-          console.log('Door and Handle Pair Found');
+          //console.log('Door and Handle Pair Found');
           if (
             angles[i] === angles[i + 1] ||
             angles[i] + 1 === angles[i + 1] ||
@@ -592,7 +595,7 @@ class App extends Component {
           }
         }
       }
-      console.log(multiDoorDistances);
+      //console.log(multiDoorDistances);
       //We have more than one door in front of us
       if (multiDoorDistances.length >= 2) {
         this.state.multiDoorReadings.dists = multiDoorDistances;
@@ -716,29 +719,30 @@ class App extends Component {
     }
   };
 
-  doorSelectionPhase = (multiDoorDistances, multiDoorAngles) => {
+  doorSelectionPhase = (multiDoorDistances, multiDoorAngles, colors) => {
+    console.log(multiDoorDistances);
     Tts.speak('There are multiple doors in front of you.');
-
+    //console.log(colors);
     for (let i = 1; i <= multiDoorDistances.length; i++) {
       //TTS can't pronounce is correctly so we switched to to es
       Tts.speak(
-        'Door ' + i + ' is' + this.outputPositionText(multiDoorAngles[i - 1]),
+        'Door ' + i + ' is ' +  colors[i-1] + ' and at ' + this.outputPositionText(multiDoorAngles[i - 1]) + ' and ' + multiDoorDistances[i-1] + ' meters away ',
       );
     }
-    Tts.speak(
-      'Please select between the doors by saying the door number. Example: Door 1.',
-    );
+    // Tts.speak(
+    //   'Please select between the doors by saying the door number. Example: Door 1.',
+    // );
     //Programmatically press the button to start the voice input
 
     //Wait for user input
-    const doorNumber = result.match(/\d+/);
-    if (doorNumber <= multiDoorDistances.length && doorNumber > 0) {
-      Tts.speak('Door ' + doorNumber +' has been selected');
-      this.setState({mainDoorAngle: multiDoorAngles[doorNumber - 1]})
-      this.setState({mainDoorDistance: multiDoorDistances[doorNumber - 1]})
-    } else {
-      Tts.speak('Invalid door');
-    }
+    // const doorNumber = result.match(/\d+/);
+    // if (doorNumber <= multiDoorDistances.length && doorNumber > 0) {
+    //   Tts.speak('Door ' + doorNumber +' has been selected');
+    //   this.setState({mainDoorAngle: multiDoorAngles[doorNumber - 1]})
+    //   this.setState({mainDoorDistance: multiDoorDistances[doorNumber - 1]})
+    // } else {
+    //   Tts.speak('Invalid door');
+    // }
   };
   //Operations
   //Return 1 door has to correspond with input of Calibration Phase
@@ -924,6 +928,7 @@ class App extends Component {
     let angles = [];
     let names = [];
     let centerXCoords = [];
+    let colors = [];
 
     for (let i = 0; i < res.index.length; i++) {
       // only save result if name is door
@@ -934,14 +939,31 @@ class App extends Component {
         let distance = data[1];
         let confidence = data[2];
         let name = data[3];
+        let color = data[5];
         let centerXCoord = data[4];
+        colors.push(color);
         distances.push(distance);
         angles.push(angle);
         names.push(name);
         centerXCoords.push(centerXCoord);
+      } else if (res.data[res.index[i]][3] === 'handle') {
+        let index = res.index[i];
+        let data = res.data[index];
+        let angle = data[0];
+        let distance = data[1];
+        let name = data[3];
+        distances.push(distance);
+        angles.push(angle);
+        names.push(name);
+
       }
     }
-
+    doorCount = 0;
+    for (let i = 0; i < names.length; i++){
+      if(names[i] === 'door'){
+        doorCount++;
+      }
+    }
     if (distances.length == 0) {
       //As long as we have no results we won't be entering the search phase
       if (distanceHistory.length > 5) {
@@ -990,18 +1012,18 @@ class App extends Component {
     if (this.state.phase == 'Searching') {
       this.searchPhase(distances, angles, names);
     } else if (this.state.phase == 'Door Selection') {
-      this.doorSelectionPhase(
-        this.state.multiDoorReadings.dists,
-        this.state.multiDoorReadings.angles,
-      );
-      if (this.state.mainDoorAngle == 0.0 && this.state.mainDoorDistance == 0.0){
-
+      if(doorCount > 1){
+        this.doorSelectionPhase(
+          this.state.multiDoorReadings.dists,
+          this.state.multiDoorReadings.angles,
+          colors
+        );
       } else {
-        distances.push(this.state.mainDoorDistance);
-        angles.push(this.state.mainDoorAngle);
-        this.state.phase == 'Calibrating'
+        Tts.stop();
+        this.setState({phase: 'Calibrating'});
         this.calibratingPhase(distances, angles);
       }
+      
     } else if (this.state.phase == 'Calibrating') {
       this.calibratingPhase(distances, angles);
     } else {
