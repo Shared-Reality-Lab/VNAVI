@@ -265,3 +265,5 @@ package-lock.json
 
 # Android memory profiler files
 *.hprof
+VnaviApp/ios/VnaviApp.xcodeproj/project.pbxproj
+VnaviApp/ios/Podfile.lock
