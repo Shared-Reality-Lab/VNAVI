@@ -19,12 +19,16 @@ import Sound from 'react-native-sound';
 import SensorDisplay from './components/sensorDisplay';
 import Voiceinput from './components/voiceInput';
 import {LogBox} from 'react-native';
+import { Dimensions } from 'react-native';
 
 LogBox.ignoreAllLogs();
 
 var count = 3;
 var door_found = false;
 var searching_phase = true;
+const { height, width } = Dimensions.get('window');
+const helpBottom = height * 0.93; // 5% bottom of the screen
+const helpRight = width * 0.45; // 50% center of the screen
 
 const options = {
   enableVibrateFallback: true,
@@ -1036,6 +1040,7 @@ class App extends Component {
     Tts.stop();
     this.resetState();
   };
+  
 
   render() {
     const {result} = this.state;
@@ -1047,6 +1052,12 @@ class App extends Component {
           ref={ref => {
             this.camera = ref;
           }}>
+            <SensorDisplay
+          data={this.state.last_two_data}
+          distanceHistory={distanceHistory}
+          doorExpectation={this.state.doorExpectation}
+        />
+          <View style={{ flex: 1, justifyContent: 'flex-end', alignItems: 'center' }}>
           <TouchableOpacity
             activeOpacity={0.5}
             style={styles.buttonHelp}
@@ -1060,17 +1071,7 @@ class App extends Component {
               HELP
             </Text>
           </TouchableOpacity>
-        </RNCamera>
-        <View>
-          <Text>{result}</Text>
-          <Voiceinput onResult={this.handleResult} />
-        </View>
-        <SensorDisplay
-          data={this.state.last_two_data}
-          distanceHistory={distanceHistory}
-          doorExpectation={this.state.doorExpectation}
-        />
-        <Text style={styles.text}>
+          <Text style={{color: 'white',fontSize: 15, textAlign: "center"}}>
           {(this.state.running ? this.state.phase + ' phase' : 'Not Running') +
             ':' +
             this.state.mode +
@@ -1104,7 +1105,7 @@ class App extends Component {
         </TouchableOpacity>
         <TouchableOpacity
           activeOpacity={0.5}
-          style={styles.button}
+          style={[styles.button, {backgroundColor: this.state.running ? '#ff0000' : '#4CBB17', padding: 20}]}
           onPress={() => {
             this.state.running ? this.stopStream() : this.takeStream();
           }}>
@@ -1117,15 +1118,26 @@ class App extends Component {
             {this.state.running ? 'STOP STREAM' : 'TAKE STREAM'}
           </Text>
         </TouchableOpacity>
-        <Button
-          title={this.state.mode + ' mode'}
-          onPress={() => {
-            this.setState({
-              mode: this.state.mode == 'Voice' ? 'Beep' : 'Voice',
-            });
-          }}
-        />
-        <Text>{this.state.mode}</Text>
+        <TouchableOpacity
+        activeOpacity={0.5}
+        style={[styles.button, {marginBottom: 20}]}
+        onPress={() => {
+          this.setState({
+            mode: this.state.mode == 'Voice' ? 'Beep' : 'Voice',
+          });
+        }}>
+          <Text
+            style={{
+              alignItems: 'center',
+              color: '#ffffff',
+              fontWeight: 'bold',
+            }}>
+            {this.state.mode + ' mode'}
+          </Text>
+        </TouchableOpacity>
+        </View>
+        </RNCamera>
+       
         <Modal
           animationType={'fade'}
           transparent={false}
@@ -1167,9 +1179,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#008ecc',
     padding: 10,
-    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: "black",
+    //marginBottom: 10,
+    width: width,
   },
   buttonHelp: {
+    position: 'absolute', 
+    bottom: helpBottom, 
+    right: helpRight, 
     alignItems: 'center',
     backgroundColor: '#008ecc',
     padding: 5,

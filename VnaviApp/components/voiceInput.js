@@ -31,14 +31,14 @@ const Voiceinput = ( {onResult} ) => {
   };
 
   return (
-    <View style={{alignItems: 'center', backgroundColor: 'rgba(255,255,255,0.2)' }}>
+    <View style={{alignItems: 'center'}}>
         {/* <Text style={{fontSize:20, color: 'green', fontWeight: '500'}}>Voice Input:</Text>
         <Text>{result}</Text>
-        <Text>{error}</Text> */}
+        <Text>{error}</Text> }
         <TouchableOpacity 
           onPress={isRecording ? stopRecording : startRecording}> 
           <Text style={{color: 'red'}}>{isRecording ? 'Stop Recording' : 'Start Recording'}</Text>
-        </TouchableOpacity> 
+  </TouchableOpacity> */}
     </View>
   );
 };

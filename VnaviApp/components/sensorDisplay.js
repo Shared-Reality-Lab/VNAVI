@@ -147,7 +147,7 @@ const SensorDisplay = (props) => {
   }, [gyroscopeData, accelerometerData]);
 
   return (
-    <View style={{ position:'absolute', backgroundColor: 'rgba(255,255,255,0.2)' }}>
+    <View style={{ position:'relative', backgroundColor: 'rgba(255,255,255,0.2)', paddingLeft: 10, paddingTop: 30, alignSelf: "flex-start"}}>
         <Text>Accelerometer:</Text>
         <Text>x: {accelerometerData.x.toFixed(2)}</Text>
         <Text>y: {accelerometerData.y.toFixed(2)}</Text>
