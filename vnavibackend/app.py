@@ -13,18 +13,18 @@ from colorthief import ColorThief
 from scipy.spatial.distance import cdist
 
 custom_colors = np.array([
-    [255, 0, 0],    # Red
-    [0, 255, 0],    # Green
-    [0, 0, 255],    # Blue
-    [255, 255, 0],  # Yellow
-    [0, 255, 255],   # Cyan
-    [255, 0, 255],   # Magenta
+    [200, 50, 50],    # Red
+    [50, 200, 50],    # Green
+    [50, 50, 200],    # Blue
+    [200, 200, 50],  # Yellow
+    [50, 200, 200],   # Cyan
+    [200, 50, 200],   # Magenta
     [255, 153, 204], # Pink
     [150, 75, 0],    # Brown
     [255, 255, 255],  # White
     [0, 0, 0],  # Black
     [128, 128, 128],  # Gray
-    [128, 0, 128],  # Purple  
+    [128, 30, 128],  # Purple  
 ])
 
 color_names = np.array([
@@ -89,7 +89,6 @@ def parse_result(result):
     w = result.render()[0].shape[1]
     df = result.pandas().xyxy[0]
     df = df.drop(df[(df['name'] != 'handle') & (df['name'] != 'door')].index)
-    print(df)
     data_list = []
     for i in range(df.shape[0]):
         est_orientation = 0
@@ -118,15 +117,16 @@ def parse_result(result):
             file = extract_image(request)
             image = Image.open(file)
             xmin, ymin, xmax, ymax = df.iloc[i]['xmin'], df.iloc[i]['ymin'], df.iloc[i]['xmax'], df.iloc[i]['ymax']
+            
             cropped_img = image.crop((xmin, ymin, xmax, ymax))
             cropped_img = cropped_img.convert("RGB")
             cropped_img.save('cropped_img.jpg')
             color_thief = ColorThief('cropped_img.jpg')
             dominant_color = color_thief.get_color(quality=1)
+            #print('DOMINANT COLOR', dominant_color)
             distances = cdist(custom_colors, [dominant_color])
             closest_color_index = np.argmin(distances)
             closest_color = color_names[closest_color_index]
-            print(closest_color)
             data_list.insert(len(data_list),
                             [est_orientation,
                             float("{:.3f}".format(est_distance)),
@@ -151,6 +151,10 @@ def detect_res_json():
     image = Image.open(io.BytesIO(file.read()))
     result = model(image, size=1280)
     res_json, _ = parse_result(result)
+    result.render()
+    for img in result.render():
+        rgb_image = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        cv2.imwrite('result.jpg', rgb_image)
     response = make_response(res_json, 200)
     response.headers['Content-type'] = 'application/json'
     return response

@@ -147,7 +147,7 @@ class App extends Component {
     Tts.setDefaultLanguage('en-US');
     console.log('get init status');
     Tts.getInitStatus().then(() => {
-      Tts.setDefaultRate(0.75);
+      Tts.setDefaultRate(0.80);
       Tts.speak('Hello World!');
       console.log('said hello world');
     });
@@ -338,17 +338,7 @@ class App extends Component {
               return res.json();
             })
             .then(res => {
-              console.log(res);
-              if (
-                res.data &&
-                res.data[0] &&
-                res.data[0][1] &&
-                res.data[0][1] > 30
-              ) {
-                bad_read = true;
-              }
               //console.log('response' + JSON.stringify(res));
-              if (!bad_read) {
                 if (last_two_data[0] == null) {
                   if (res.data[0] == undefined) {
                     last_two_data[0] = 'no door';
@@ -371,7 +361,7 @@ class App extends Component {
                     last_two_data[1] = res.data[0][0];
                     last_two_data[2] = res.data[0][0];
                   }
-                }
+                
               }
               if (!bad_read) {
                 this.outputResult(res, last_two_data);
@@ -435,7 +425,7 @@ class App extends Component {
   }
 
   speakInstructions = words => {
-    Tts.setDefaultRate(0.5);
+    Tts.setDefaultRate(0.85);
     if (!this.state.speaking) {
       this.setState({speaking: true});
       if (Platform.OS === 'android') {
@@ -444,7 +434,7 @@ class App extends Component {
         Tts.speak(words, iosParams);
       }
     }
-    Tts.setDefaultRate(0.6);
+    Tts.setDefaultRate(0.85);
   };
 
   speak = words => {
@@ -842,17 +832,11 @@ class App extends Component {
     }
   };
 
-  approachingPhase = (distances, angles, names, centerXCoords) => {
+  approachingPhase = (distances, angles, names, centerXCoords, handleCenterXCoords) => {
     //Indicate to the user if the door handle is on the right or left
     if (names.length === 2 && !this.state.handleSpoken) {
       this.setState({handleSpoken: true});
-      if (centerXCoords[0] >= centerXCoords[1]) {
-        if (names[0] === 'door') {
-          Tts.speak('Door handle is on the left.');
-        } else {
-          Tts.speak('Door handle is on the right.');
-        }
-      } else if (names[0] === 'door') {
+    if (handleCenterXCoords[0] >= centerXCoords[0]) { 
         Tts.speak('Door handle is on the right.');
       } else {
         Tts.speak('Door handle is on the left.');
@@ -932,6 +916,7 @@ class App extends Component {
     let angles = [];
     let names = [];
     let centerXCoords = [];
+    let handleCenterXCoords = [];
     let colors = [];
 
     for (let i = 0; i < res.index.length; i++) {
@@ -954,11 +939,12 @@ class App extends Component {
         let index = res.index[i];
         let data = res.data[index];
         let angle = data[0];
-        let distance = data[1];
+        //let distance = data[1];
         let name = data[3];
-        distances.push(distance);
+        //distances.push(distance);
         angles.push(angle);
         names.push(name);
+        handleCenterXCoords.push(data[4])
 
       }
     }
@@ -1031,7 +1017,7 @@ class App extends Component {
     } else if (this.state.phase == 'Calibrating') {
       this.calibratingPhase(distances, angles);
     } else {
-      this.approachingPhase(distances, angles, names, centerXCoords);
+      this.approachingPhase(distances, angles, names, centerXCoords, handleCenterXCoords);
     }
   };
 
