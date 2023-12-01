@@ -147,7 +147,7 @@ class App extends Component {
     Tts.setDefaultLanguage('en-US');
     console.log('get init status');
     Tts.getInitStatus().then(() => {
-      Tts.setDefaultRate(0.80);
+      Tts.setDefaultRate(0.6);
       Tts.speak('Hello World!');
       console.log('said hello world');
     });
@@ -338,6 +338,7 @@ class App extends Component {
               return res.json();
             })
             .then(res => {
+              console.log('response' + JSON.stringify(res));
               //console.log('response' + JSON.stringify(res));
                 if (last_two_data[0] == null) {
                   if (res.data[0] == undefined) {
@@ -425,7 +426,7 @@ class App extends Component {
   }
 
   speakInstructions = words => {
-    Tts.setDefaultRate(0.85);
+    Tts.setDefaultRate(0.90);
     if (!this.state.speaking) {
       this.setState({speaking: true});
       if (Platform.OS === 'android') {
@@ -434,7 +435,7 @@ class App extends Component {
         Tts.speak(words, iosParams);
       }
     }
-    Tts.setDefaultRate(0.85);
+    Tts.setDefaultRate(0.90);
   };
 
   speak = words => {
@@ -563,43 +564,26 @@ class App extends Component {
 
   searchPhase = (distances, angles, names) => {
     console.log('searching phase');
-    if (names.length >= 4) {
+    if (names.filter(name => name === 'door').length > 1) {
+
       let multiDoorDistances = [];
       let multiDoorAngles = [];
-      for (let i = 0; i < names.length - 1; i++) {
-        //Check for door and handle pairs
-        if (
-          (names[i] === 'door' && names[i + 1] === 'handle') ||
-          (names[i] === 'handle' && names[i + 1] === 'door')
-        ) {
-          //console.log('Door and Handle Pair Found');
-          if (
-            angles[i] === angles[i + 1] ||
-            angles[i] + 1 === angles[i + 1] ||
-            angles[i] === angles[i] + 1
-          ) {
-            console.log('Door and Handle Pair Found');
-            if (names[i] === 'door') {
-              multiDoorDistances.push(distances[i]);
-              multiDoorAngles.push(angles[i]);
-            } else {
-              multiDoorDistances.push(distances[i + 1]);
-              multiDoorAngles.push(angles[i + 1]);
-            }
-          }
-        }
-      }
-      //console.log(multiDoorDistances);
-      //We have more than one door in front of us
-      if (multiDoorDistances.length >= 2) {
-        this.state.multiDoorReadings.dists = multiDoorDistances;
-        this.state.multiDoorReadings.angles = multiDoorAngles;
-        this.setState({multiDoorReadings: this.state.multiDoorReadings});
-        this.setState({phase: 'Door Selection'});
-        return;
-      }
+    for (let i = 0; i < names.length - 1; i++) {
+      if (names[i] === 'door') {
+        multiDoorDistances.push(distances[i]);
+        multiDoorAngles.push(angles[i]);
     }
-
+    //console.log(multiDoorDistances);
+    //We have more than one door in front of u
+    }
+    if (multiDoorDistances.length >= 2) {
+      this.state.multiDoorReadings.dists = multiDoorDistances;
+      this.state.multiDoorReadings.angles = multiDoorAngles;
+      this.setState({multiDoorReadings: this.state.multiDoorReadings});
+      this.setState({phase: 'Door Selection'});
+      return;
+    }
+  }
     console.log('Door Detected');
     count++;
     //distances[0] = Math.round(distances[0] * 10) / 10;
@@ -834,6 +818,9 @@ class App extends Component {
 
   approachingPhase = (distances, angles, names, centerXCoords, handleCenterXCoords) => {
     //Indicate to the user if the door handle is on the right or left
+    if(!this.state.handleSpoken){
+      Tts.speak('Door is a few steps away.')
+    }
     if (names.length === 2 && !this.state.handleSpoken) {
       this.setState({handleSpoken: true});
     if (handleCenterXCoords[0] >= centerXCoords[0]) { 
